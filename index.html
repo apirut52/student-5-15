@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบตรวจสอบข้อมูล 5/15</title>
+    <!-- โหลด LINE LIFF SDK -->
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <!-- โหลด Supabase JS Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Google Fonts (Prompt) -->
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Prompt', sans-serif;
+        }
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(180deg, #621aaf 0%, #9a48f2 40%, #f8fafc 100%);
+            color: #1e293b;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            width: 100%;
+            max-width: 420px;
+        }
+        
+        /* ส่วนหัว: เอาพื้นหลังขาวออก เหลือแค่โลโก้และข้อความลอย */
+        .header-top {
+            text-align: center;
+            padding: 10px 20px 20px 20px;
+            margin-bottom: 10px;
+        }
+        .big-school-logo {
+            width: 75px;
+            height: 75px;
+            object-fit: contain;
+            margin-bottom: 8px;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
+        }
+        .header-top h1 {
+            font-size: 17px;
+            font-weight: 600;
+            color: #ffffff;
+            margin: 0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* แถบข้อมูลโปรไฟล์ย่อย */
+        .profile-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #ffffff;
+            padding: 14px 18px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px -5px rgba(109, 40, 217, 0.05);
+            margin-bottom: 16px;
+            border: 1px solid #f3e8ff;
+        }
+        .user-info-mini {
+            text-align: left;
+        }
+        .user-info-mini .name {
+            font-size: 14px;
+            font-weight: 500;
+            color: #334155;
+        }
+        .user-info-mini .id {
+            font-size: 12px;
+            color: #64748b;
+        }
+        .profile-img {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #7c3aed;
+        }
+
+        /* Card หลักสำหรับฟอร์ม */
+        .card {
+            background: #ffffff;
+            padding: 24px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px -5px rgba(109, 40, 217, 0.05);
+            border: 1px solid #f3e8ff;
+            margin-bottom: 16px;
+        }
+        h2 {
+            color: #6d28d9;
+            font-size: 18px;
+            font-weight: 600;
+            margin-top: 0;
+            margin-bottom: 12px;
+        }
+        p {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 15px;
+            border: 2px solid #e9d5ff;
+            border-radius: 12px;
+            outline: none;
+            background-color: #faf5ff;
+            color: #4c1d95;
+            margin-bottom: 14px;
+        }
+        input[type="text"]:focus, textarea:focus {
+            border-color: #7c3aed;
+            background-color: #ffffff;
+        }
+        button[type="submit"], .treasurer-btn {
+            width: 100%;
+            padding: 12px;
+            font-size: 15px;
+            font-weight: 500;
+            background-color: #7c3aed;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.2);
+            text-align: center;
+        }
+        button[type="submit"]:hover, .treasurer-btn:hover {
+            background-color: #6d28d9;
+        }
+        .treasurer-btn {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            margin-bottom: 16px;
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.2);
+        }
+        .treasurer-btn:hover {
+            background: linear-gradient(135deg, #047857 0%, #065f46 100%);
+        }
+
+        /* กล่องยอดเงินค้างชำระ */
+        .debt-card {
+            background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(124, 58, 237, 0.2);
+            margin-bottom: 16px;
+            text-align: center;
+        }
+        .debt-title {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+        .debt-amount {
+            font-size: 32px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+        .debt-unit {
+            font-size: 16px;
+            font-weight: 400;
+        }
+
+        .detail-card {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 20px;
+            border: 1px solid #f3e8ff;
+            box-shadow: 0 4px 12px rgba(109, 40, 217, 0.05);
+            margin-bottom: 16px;
+        }
+        .detail-card h3 {
+            font-size: 15px;
+            color: #334155;
+            margin-top: 0;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #f1f5f9;
+            padding-bottom: 8px;
+        }
+        .detail-card p {
+            margin: 6px 0;
+            font-size: 14px;
+            color: #475569;
+        }
+
+        /* กล่องแสดงประกาศสำหรับทุกคน */
+        .announcement-box {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 20px;
+            border: 1px solid #f3e8ff;
+            box-shadow: 0 4px 12px rgba(109, 40, 217, 0.05);
+            margin-bottom: 16px;
+        }
+        .announcement-box h3 {
+            font-size: 15px;
+            color: #6d28d9;
+            margin-top: 0;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .announcement-item {
+            background: #faf5ff;
+            padding: 14px;
+            border-radius: 12px;
+            border-left: 4px solid #7c3aed;
+            margin-bottom: 10px;
+            position: relative;
+        }
+        .announcement-item:last-child {
+            margin-bottom: 0;
+        }
+        .announcement-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            padding-right: 90px;
+        }
+        .author-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .author-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid #7c3aed;
+        }
+        .author-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #6d28d9;
+        }
+        .announcement-title {
+            font-weight: 600;
+            font-size: 15px;
+            color: #1e293b;
+            margin-bottom: 4px;
+        }
+        .announcement-text {
+            font-size: 13px;
+            color: #334155;
+            margin: 0;
+            white-space: pre-line;
+        }
+        .action-btns {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            display: flex;
+            gap: 4px;
+        }
+        .edit-btn {
+            background: #f59e0b;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+        .edit-btn:hover {
+            background: #d97706;
+        }
+        .delete-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+        .delete-btn:hover {
+            background: #dc2626;
+        }
+
+        #loading {
+            text-align: center;
+            font-size: 30px;
+            color: #f7f5fa;
+            font-weight: 500;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- สถานะกำลังโหลด -->
+        <div id="loading">กำลังโหลดข้อมูลระบบ...</div>
+
+        <!-- ส่วนหลัก (แสดงเมื่อโหลด LIFF สำเร็จ) -->
+        <div id="mainContent" style="display: none;">
+            
+            <!-- โลโก้และข้อความแบบไม่มีกรอบพื้นหลังขาว -->
+            <div class="header-top">
+                <img src="https://thumb.wikimedia.org/wikipedia/th/thumb/6/6f/Seal_of_Srisongkram_Wittaya_School.svg/250px-Seal_of_Srisongkram_Wittaya_School.svg.png" class="big-school-logo" alt="School Logo">
+                <h1>ยอดเงินค้างชำระ ม.5/15</h1>
+            </div>
+
+            <!-- แถบโปรไฟล์ LINE และรหัสนักเรียน -->
+            <div class="profile-bar">
+                <div class="user-info-mini">
+                    <div class="name" id="lineDisplayName">ชื่อ LINE</div>
+                    <div class="id" id="headerStudentId">รหัส: -</div>
+                </div>
+                <img id="lineProfileImg" class="profile-img" src="" alt="Profile">
+            </div>
+
+            <!-- กล่องแสดงประกาศ -->
+            <div class="announcement-box">
+                <h3>📢 ประกาศจากห้อง</h3>
+                <div id="announcementList">
+                    <p style="font-size: 13px; color: #64748b; margin: 0;">กำลังโหลดประกาศ...</p>
+                </div>
+            </div>
+
+            <!-- ปุ่มพิเศษสำหรับเหรัญยิก/แอดมิน -->
+            <div id="treasurerSection" style="display: none;">
+                <button class="treasurer-btn" onclick="openAnnouncementForm()">➕ เพิ่มประกาศใหม่</button>
+            </div>
+
+            <!-- ฟอร์มเพิ่มประกาศ -->
+            <div id="announcementModal" class="card" style="display: none;">
+                <h2 id="formTitle">สร้างประกาศใหม่</h2>
+                <form id="announcementForm">
+                    <input type="hidden" id="editAnnouncementId">
+                    <input type="text" id="announcementTitle" placeholder="หัวข้อประกาศ" required>
+                    <textarea id="announcementContent" rows="3" placeholder="รายละเอียดเนื้อหาประกาศ..." required></textarea>
+                    <button type="submit" id="submitBtn">เผยแพร่ประกาศ</button>
+                </form>
+            </div>
+
+            <!-- 1. ส่วนฟอร์มลงทะเบียน -->
+            <div id="registerSection" class="card" style="display: none;">
+                <h2>ลงทะเบียนนักเรียน 5/15</h2>
+                <p>กรอกข้อมูลของคุณเพื่อเชื่อมต่อระบบ</p>
+                <form id="registerForm">
+                    <input type="text" id="studentId" placeholder="หมายเลขนักเรียน (5 หลัก)" maxlength="5" required>
+                    <input type="text" id="studentName" placeholder="ชื่อ - นามสกุล" required>
+                    <button type="submit">ยืนยันข้อมูล</button>
+                </form>
+            </div>
+
+            <!-- 2. ส่วนยอดเงินค้างชำระ -->
+            <div class="debt-card">
+                <div class="debt-title">ยอดเงินค้างชำระทั้งหมด</div>
+                <div class="debt-amount"><span id="showBalance">0.00</span> <span class="debt-unit">บาท</span></div>
+            </div>
+
+            <!-- 3. ส่วนรายละเอียดข้อมูล -->
+            <div class="detail-card">
+                <h3>รายละเอียดข้อมูล</h3>
+                <p><strong>ชื่อ-นามสกุล:</strong> <span id="showStudentName" style="color: #6d28d9; font-weight: 500;">-</span></p>
+                <p><strong>หมายเลขนักเรียน:</strong> <span id="showStudentId" style="color: #6d28d9; font-weight: 500;">-</span></p>
+                <p><strong>สถานะระบบ:</strong> <span style="color: #059669; font-weight: 500;">ยืนยันตัวตนเรียบร้อย ✅</span></p>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://lzzjgclhhtsjudbhscws.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_5nIx2U7H0hNzoTa_qINb3Q_aUa9thaG';
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        const LIFF_ID = "2011929249-w3v4SEWN";
+        let currentUserRole = 'student';
+        let currentStudentName = '';
+        let currentUserPic = '';
+
+        async function main() {
+            try {
+                await liff.init({ liffId: LIFF_ID });
+                if (!liff.isLoggedIn()) {
+                    liff.login();
+                    return;
+                }
+
+                const profile = await liff.getProfile();
+                const lineId = profile.userId;
+                
+                currentUserPic = profile.pictureUrl || 'https://via.placeholder.com/44';
+                document.getElementById('lineDisplayName').innerText = profile.displayName;
+                document.getElementById('lineProfileImg').src = currentUserPic;
+
+                const { data, error } = await _supabase
+                    .from('students_5_15')
+                    .select('*')
+                    .eq('line_id', lineId)
+                    .maybeSingle();
+
+                if (data) {
+                    currentUserRole = data.role || 'student';
+                    currentStudentName = data.student_name || 'ผู้ดูแลระบบ';
+
+                    document.getElementById('showStudentId').innerText = data.student_id;
+                    document.getElementById('headerStudentId').innerText = 'รหัส: ' + data.student_id;
+                    document.getElementById('showStudentName').innerText = currentStudentName;
+                    
+                    const userBalance = data.balance !== undefined && data.balance !== null ? data.balance : 0;
+                    document.getElementById('showBalance').innerText = Number(userBalance).toLocaleString('th-TH', { minimumFractionDigits: 2 });
+
+                    if (currentUserRole === 'treasurer' || currentUserRole === 'admin') {
+                        document.getElementById('treasurerSection').style.display = 'block';
+                    }
+                } else {
+                    document.getElementById('registerSection').style.display = 'block';
+                }
+
+                loadAnnouncements();
+
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
+
+                document.getElementById('registerForm').addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    const studentId = document.getElementById('studentId').value;
+                    const studentName = document.getElementById('studentName').value;
+
+                    const { error: insertError } = await _supabase
+                        .from('students_5_15')
+                        .insert([{ 
+                            line_id: lineId, 
+                            student_id: studentId, 
+                            student_name: studentName,
+                            balance: 0,
+                            role: 'student' 
+                        }]);
+
+                    if (insertError) {
+                        alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล: " + insertError.message);
+                    } else {
+                        alert("ลงทะเบียนสำเร็จ!");
+                        location.reload();
+                    }
+                });
+
+                document.getElementById('announcementForm').addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    const editId = document.getElementById('editAnnouncementId').value;
+                    const title = document.getElementById('announcementTitle').value;
+                    const content = document.getElementById('announcementContent').value;
+
+                    if (editId) {
+                        const { error: updateError } = await _supabase
+                            .from('announcements')
+                            .update({ title: title, content: content })
+                            .eq('id', editId);
+
+                        if (updateError) {
+                            alert("เกิดข้อผิดพลาดในการแก้ไขประกาศ: " + updateError.message);
+                        } else {
+                            alert("แก้ไขประกาศสำเร็จ!");
+                            resetAnnouncementForm();
+                            loadAnnouncements();
+                        }
+                    } else {
+                        const { error: annError } = await _supabase
+                            .from('announcements')
+                            .insert([{ 
+                                title: title, 
+                                content: content,
+                                author_name: currentStudentName 
+                            }]);
+
+                        if (annError) {
+                            alert("เกิดข้อผิดพลาดในการโพสต์ประกาศ: " + annError.message);
+                        } else {
+                            alert("โพสต์ประกาศสำเร็จ!");
+                            resetAnnouncementForm();
+                            loadAnnouncements();
+                        }
+                    }
+                });
+
+            } catch (error) {
+                console.error("LIFF init failed", error);
+                document.getElementById('loading').innerText = "เกิดข้อผิดพลาดในการโหลดระบบ";
+            }
+        }
+
+        async function loadAnnouncements() {
+            const { data, error } = await _supabase
+                .from('announcements')
+                .select('*')
+                .order('id', { ascending: false });
+
+            const container = document.getElementById('announcementList');
+            if (error || !data || data.length === 0) {
+                container.innerHTML = '<p style="font-size: 13px; color: #64748b; margin: 0;">ยังไม่มีประกาศในขณะนี้</p>';
+                return;
+            }
+
+            let html = '';
+            data.forEach(item => {
+                let actionBtnsHtml = '';
+                if (currentUserRole === 'admin' || currentUserRole === 'treasurer') {
+                    actionBtnsHtml = `
+                        <div class="action-btns">
+                            <button class="edit-btn" onclick="editAnnouncement(${item.id}, \`${escapeQuotes(item.title)}\`, \`${escapeQuotes(item.content)}\`)">แก้ไข</button>
+                            <button class="delete-btn" onclick="deleteAnnouncement(${item.id})">ลบ</button>
+                        </div>
+                    `;
+                }
+
+                let authorName = item.author_name ? escapeHtml(item.author_name) : "ผู้ดูแลระบบ";
+
+                html += `
+                    <div class="announcement-item">
+                        ${actionBtnsHtml}
+                        <div class="announcement-header">
+                            <div class="author-info">
+                                <img src="${currentUserPic}" class="author-avatar" alt="Avatar">
+                                <span class="author-name">${authorName}</span>
+                            </div>
+                        </div>
+                        <div class="announcement-title">${escapeHtml(item.title)}</div>
+                        <p class="announcement-text">${escapeHtml(item.content)}</p>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function editAnnouncement(id, title, content) {
+            document.getElementById('editAnnouncementId').value = id;
+            document.getElementById('announcementTitle').value = title;
+            document.getElementById('announcementContent').value = content;
+            document.getElementById('formTitle').innerText = "แก้ไขประกาศ";
+            document.getElementById('submitBtn').innerText = "บันทึกการแก้ไข";
+            
+            const modal = document.getElementById('announcementModal');
+            modal.style.display = 'block';
+            modal.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        async function deleteAnnouncement(id) {
+            if (!confirm("คุณต้องการลบประกาศนี้ใช่หรือไม่?")) return;
+
+            const { error } = await _supabase
+                .from('announcements')
+                .delete()
+                .eq('id', id);
+
+            if (error) {
+                alert("เกิดข้อผิดพลาดในการลบประกาศ: " + error.message);
+            } else {
+                alert("ลบประกาศสำเร็จ!");
+                loadAnnouncements();
+            }
+        }
+
+        function resetAnnouncementForm() {
+            document.getElementById('announcementModal').style.display = 'none';
+            document.getElementById('announcementForm').reset();
+            document.getElementById('editAnnouncementId').value = '';
+            document.getElementById('formTitle').innerText = "สร้างประกาศใหม่";
+            document.getElementById('submitBtn').innerText = "เผยแพร่ประกาศ";
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function escapeQuotes(text) {
+            if (!text) return '';
+            return text.replace(/'/g, '\\'').replace(/"/g, '\\"');
+        }
+
+        function openAnnouncementForm() {
+            resetAnnouncementForm();
+            const modal = document.getElementById('announcementModal');
+            modal.style.display = modal.style.display === 'none' ? 'block' : 'none';
+        }
+
+        main();
+    </script>
+</body>
+</html>
