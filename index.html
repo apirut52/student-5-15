@@ -27,7 +27,7 @@
         }
         .container {
             width: 100%;
-            max-width: 860px; /* ขยายความกว้าง container เพื่อรองรับการจัดแบบ 2 คอลัมน์ */
+            max-width: 860px;
         }
         
         /* ส่วนหัว: โลโก้และข้อความลอยตรงกลางด้านบน */
@@ -37,8 +37,8 @@
             margin-bottom: 10px;
         }
         .big-school-logo {
-            width: 75px;
-            height: 75px;
+            width: 100px;
+            height: 100px;
             object-fit: contain;
             margin-bottom: 8px;
             filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
@@ -51,7 +51,7 @@
             text-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        /* โครงสร้างแบบ 2 คอลัมน์ */
+        /* โครงสร้างแบบ 2 คอลัมน์สำหรับจอใหญ่ */
         .main-layout {
             display: flex;
             gap: 20px;
@@ -69,13 +69,20 @@
             gap: 16px;
         }
 
-        /* รองรับหน้าจอ มือถือ (Responsive) ให้เรียงลงมาแถวเดียว */
+        /* รองรับหน้าจอ มือถือ (Responsive) ให้สลับลำดับการแสดงผล */
         @media (max-width: 768px) {
             .main-layout {
                 flex-direction: column;
             }
             .container {
                 max-width: 420px;
+            }
+            /* บนมือถือ: สลับให้ right-column (ประกาศ) ขึ้นมาก่อน left-column บางส่วนตามต้องการ */
+            .right-column {
+                order: 1;
+            }
+            .left-column {
+                order: 2;
             }
         }
 
@@ -338,7 +345,7 @@
             <!-- โครงสร้างแบบ 2 คอลัมน์ -->
             <div class="main-layout">
                 
-                <!-- คอลัมน์ซ้าย: ข้อมูลโปรไฟล์, ยอดเงิน, รายละเอียด (หรือฟอร์มลงทะเบียน) -->
+                <!-- คอลัมน์ซ้าย: ข้อมูลโปรไฟล์ และยอดเงิน (หรือฟอร์มลงทะเบียน) -->
                 <div class="left-column">
                     <!-- แถบโปรไฟล์ LINE -->
                     <div class="profile-bar">
@@ -365,17 +372,9 @@
                         <div class="debt-title">ยอดเงินค้างชำระทั้งหมด</div>
                         <div class="debt-amount"><span id="showBalance">0.00</span> <span class="debt-unit">บาท</span></div>
                     </div>
-
-                    <!-- ส่วนรายละเอียดข้อมูล -->
-                    <div class="detail-card">
-                        <h3>รายละเอียดข้อมูล</h3>
-                        <p><strong>ชื่อ-นามสกุล:</strong> <span id="showStudentName" style="color: #6d28d9; font-weight: 500;">-</span></p>
-                        <p><strong>หมายเลขนักเรียน:</strong> <span id="showStudentId" style="color: #6d28d9; font-weight: 500;">-</span></p>
-                        <p><strong>สถานะระบบ:</strong> <span style="color: #059669; font-weight: 500;">ยืนยันตัวตนเรียบร้อย ✅</span></p>
-                    </div>
                 </div>
 
-                <!-- คอลัมน์ขวา: ประกาศจากห้อง และปุ่มจัดการ -->
+                <!-- คอลัมน์ขวา: ประกาศจากห้อง และส่วนรายละเอียดข้อมูล -->
                 <div class="right-column">
                     <!-- ปุ่มพิเศษสำหรับเหรัญยิก/แอดมิน -->
                     <div id="treasurerSection" style="display: none;">
@@ -399,6 +398,14 @@
                         <div id="announcementList">
                             <p style="font-size: 13px; color: #64748b; margin: 0;">กำลังโหลดประกาศ...</p>
                         </div>
+                    </div>
+
+                    <!-- ส่วนรายละเอียดข้อมูล (อยู่ใต้ประกาศบนมือถือ) -->
+                    <div class="detail-card">
+                        <h3>รายละเอียดข้อมูล</h3>
+                        <p><strong>ชื่อ-นามสกุล:</strong> <span id="showStudentName" style="color: #6d28d9; font-weight: 500;">-</span></p>
+                        <p><strong>หมายเลขนักเรียน:</strong> <span id="showStudentId" style="color: #6d28d9; font-weight: 500;">-</span></p>
+                        <p><strong>สถานะระบบ:</strong> <span style="color: #059669; font-weight: 500;">ยืนยันตัวตนเรียบร้อย ✅</span></p>
                     </div>
                 </div>
 
