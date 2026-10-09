@@ -27,7 +27,7 @@
         }
         .container {
             width: 100%;
-            max-width: 860px; /* ขยายความกว้าง container เพื่อรองรับการจัดแบบ 2 คอลัมน์ */
+            max-width: 860px;
         }
         
         /* ส่วนหัว: โลโก้และข้อความลอยตรงกลางด้านบน */
@@ -51,7 +51,7 @@
             text-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        /* โครงสร้างแบบ 2 คอลัมน์ */
+        /* โครงสร้างแบบ 2 คอลัมน์สำหรับจอใหญ่ */
         .main-layout {
             display: flex;
             gap: 20px;
@@ -69,7 +69,7 @@
             gap: 16px;
         }
 
-        /* รองรับหน้าจอ มือถือ (Responsive) ให้เรียงลงมาแถวเดียว */
+        /* รองรับหน้าจอ มือถือ (Responsive) */
         @media (max-width: 768px) {
             .main-layout {
                 flex-direction: column;
@@ -311,21 +311,31 @@
             background: #dc2626;
         }
 
+        /* สถานะกำลังโหลด จัดให้อยู่กลางจอพอดี */
         #loading {
-            text-align: center;
-            font-size: 30px;
-            color: #f7f5fa;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            color: #ffffff;
             font-weight: 500;
-            margin-top: 50px;
+            background: linear-gradient(180deg, #621aaf 0%, #9a48f2 40%, #f8fafc 100%);
+            z-index: 9999;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.15);
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <!-- สถานะกำลังโหลด -->
-        <div id="loading">กำลังโหลดข้อมูลระบบ...</div>
+    <!-- สถานะกำลังโหลด อยู่กลางจอ -->
+    <div id="loading">กำลังโหลดข้อมูลระบบ...</div>
 
+    <div class="container">
         <!-- ส่วนหลัก (แสดงเมื่อโหลด LIFF สำเร็จ) -->
         <div id="mainContent" style="display: none;">
             
@@ -338,7 +348,7 @@
             <!-- โครงสร้างแบบ 2 คอลัมน์ -->
             <div class="main-layout">
                 
-                <!-- คอลัมน์ซ้าย: ข้อมูลโปรไฟล์, ยอดเงิน, รายละเอียด (หรือฟอร์มลงทะเบียน) -->
+                <!-- คอลัมน์ซ้าย: ข้อมูลโปรไฟล์ และยอดเงิน (หรือฟอร์มลงทะเบียน) -->
                 <div class="left-column">
                     <!-- แถบโปรไฟล์ LINE -->
                     <div class="profile-bar">
@@ -365,17 +375,9 @@
                         <div class="debt-title">ยอดเงินค้างชำระทั้งหมด</div>
                         <div class="debt-amount"><span id="showBalance">0.00</span> <span class="debt-unit">บาท</span></div>
                     </div>
-
-                    <!-- ส่วนรายละเอียดข้อมูล -->
-                    <div class="detail-card">
-                        <h3>รายละเอียดข้อมูล</h3>
-                        <p><strong>ชื่อ-นามสกุล:</strong> <span id="showStudentName" style="color: #6d28d9; font-weight: 500;">-</span></p>
-                        <p><strong>หมายเลขนักเรียน:</strong> <span id="showStudentId" style="color: #6d28d9; font-weight: 500;">-</span></p>
-                        <p><strong>สถานะระบบ:</strong> <span style="color: #059669; font-weight: 500;">ยืนยันตัวตนเรียบร้อย ✅</span></p>
-                    </div>
                 </div>
 
-                <!-- คอลัมน์ขวา: ประกาศจากห้อง และปุ่มจัดการ -->
+                <!-- คอลัมน์ขวา: ประกาศจากห้อง และส่วนรายละเอียดข้อมูล -->
                 <div class="right-column">
                     <!-- ปุ่มพิเศษสำหรับเหรัญยิก/แอดมิน -->
                     <div id="treasurerSection" style="display: none;">
@@ -399,6 +401,14 @@
                         <div id="announcementList">
                             <p style="font-size: 13px; color: #64748b; margin: 0;">กำลังโหลดประกาศ...</p>
                         </div>
+                    </div>
+
+                    <!-- ส่วนรายละเอียดข้อมูล -->
+                    <div class="detail-card">
+                        <h3>รายละเอียดข้อมูล</h3>
+                        <p><strong>ชื่อ-นามสกุล:</strong> <span id="showStudentName" style="color: #6d28d9; font-weight: 500;">-</span></p>
+                        <p><strong>หมายเลขนักเรียน:</strong> <span id="showStudentId" style="color: #6d28d9; font-weight: 500;">-</span></p>
+                        <p><strong>สถานะระบบ:</strong> <span style="color: #059669; font-weight: 500;">ยืนยันตัวตนเรียบร้อย ✅</span></p>
                     </div>
                 </div>
 
