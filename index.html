@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ระบบตรวจสอบข้อมูล 5/15</title>
+    <!-- Favicon (ไอคอนบนแท็บเบราว์เซอร์) -->
+    <link rel="icon" type="image/png" href="515.png">
     <!-- โหลด LINE LIFF SDK -->
     <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <!-- โหลด Supabase JS Library -->
@@ -37,11 +39,13 @@
             margin-bottom: 10px;
         }
         .big-school-logo {
-            width: 100px;
-            height: 100px;
-            object-fit: contain;
+            width: 110px;
+            height: 110px;
+            object-fit: cover;
+            border-radius: 20px;
             margin-bottom: 8px;
-            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            border: 2px solid rgba(255,255,255,0.4);
         }
         .header-top h1 {
             font-size: 24px;
@@ -511,7 +515,7 @@
             
             <!-- โลโก้และข้อความด้านบนสุด -->
             <div class="header-top">
-                <img src="https://thumb.wikimedia.org/wikipedia/th/thumb/6/6f/Seal_of_Srisongkram_Wittaya_School.svg/250px-Seal_of_Srisongkram_Wittaya_School.svg.png" class="big-school-logo" alt="School Logo">
+                <img src="515.png" class="big-school-logo" alt="5/15 Logo">
                 <h1>ยอดเงินค้างชำระ ม.5/15</h1>
             </div>
 
@@ -562,7 +566,7 @@
                         <button class="treasurer-btn" onclick="openAnnouncementForm()">➕ เพิ่มประกาศใหม่</button>
                     </div>
 
-                    <!-- ฟอร์มเพิ่ม/แก้ไขประกาศ (นำ checkbox ออกแล้ว) -->
+                    <!-- ฟอร์มเพิ่ม/แก้ไขประกาศ -->
                     <div id="announcementModal" class="card" style="display: none;">
                         <h2 id="formTitle">สร้างประกาศใหม่</h2>
                         <form id="announcementForm">
