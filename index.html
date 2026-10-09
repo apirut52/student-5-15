@@ -22,19 +22,19 @@
             color: #1e293b;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
             min-height: 100vh;
         }
         .container {
             width: 100%;
-            max-width: 420px;
+            max-width: 860px; /* ขยายความกว้าง container เพื่อรองรับการจัดแบบ 2 คอลัมน์ */
         }
         
-        /* ส่วนหัว: โลโก้และข้อความลอยแบบไม่มีพื้นหลังขาว */
+        /* ส่วนหัว: โลโก้และข้อความลอยตรงกลางด้านบน */
         .header-top {
             text-align: center;
             padding: 10px 20px 20px 20px;
-            margin-bottom: 5px;
+            margin-bottom: 10px;
         }
         .big-school-logo {
             width: 75px;
@@ -44,11 +44,39 @@
             filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
         }
         .header-top h1 {
-            font-size: 17px;
+            font-size: 24px;
             font-weight: 600;
             color: #ffffff;
             margin: 0;
             text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* โครงสร้างแบบ 2 คอลัมน์ */
+        .main-layout {
+            display: flex;
+            gap: 20px;
+        }
+        .left-column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .right-column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* รองรับหน้าจอ มือถือ (Responsive) ให้เรียงลงมาแถวเดียว */
+        @media (max-width: 768px) {
+            .main-layout {
+                flex-direction: column;
+            }
+            .container {
+                max-width: 420px;
+            }
         }
 
         /* แถบข้อมูลโปรไฟล์ย่อย */
@@ -60,7 +88,6 @@
             padding: 14px 18px;
             border-radius: 20px;
             box-shadow: 0 10px 25px -5px rgba(109, 40, 217, 0.05);
-            margin-bottom: 16px;
             border: 1px solid #f3e8ff;
         }
         .user-info-mini {
@@ -90,7 +117,6 @@
             border-radius: 20px;
             box-shadow: 0 10px 25px -5px rgba(109, 40, 217, 0.05);
             border: 1px solid #f3e8ff;
-            margin-bottom: 16px;
         }
         h2 {
             color: #6d28d9;
@@ -137,7 +163,6 @@
         }
         .treasurer-btn {
             background: linear-gradient(135deg, #059669 0%, #047857 100%);
-            margin-bottom: 16px;
             box-shadow: 0 4px 12px rgba(5, 150, 105, 0.2);
         }
         .treasurer-btn:hover {
@@ -151,7 +176,6 @@
             padding: 20px;
             border-radius: 20px;
             box-shadow: 0 8px 20px rgba(124, 58, 237, 0.2);
-            margin-bottom: 16px;
             text-align: center;
         }
         .debt-title {
@@ -175,7 +199,6 @@
             border-radius: 20px;
             border: 1px solid #f3e8ff;
             box-shadow: 0 4px 12px rgba(109, 40, 217, 0.05);
-            margin-bottom: 16px;
         }
         .detail-card h3 {
             font-size: 15px;
@@ -191,14 +214,14 @@
             color: #475569;
         }
 
-        /* กล่องแสดงประกาศสำหรับทุกคน */
+        /* กล่องแสดงประกาศ */
         .announcement-box {
             background: #ffffff;
             padding: 20px;
             border-radius: 20px;
             border: 1px solid #f3e8ff;
             box-shadow: 0 4px 12px rgba(109, 40, 217, 0.05);
-            margin-bottom: 16px;
+            flex-grow: 1;
         }
         .announcement-box h3 {
             font-size: 15px;
@@ -306,68 +329,79 @@
         <!-- ส่วนหลัก (แสดงเมื่อโหลด LIFF สำเร็จ) -->
         <div id="mainContent" style="display: none;">
             
-            <!-- โลโก้และข้อความแบบไม่มีกรอบพื้นหลังขาว -->
+            <!-- โลโก้และข้อความด้านบนสุด -->
             <div class="header-top">
                 <img src="https://thumb.wikimedia.org/wikipedia/th/thumb/6/6f/Seal_of_Srisongkram_Wittaya_School.svg/250px-Seal_of_Srisongkram_Wittaya_School.svg.png" class="big-school-logo" alt="School Logo">
                 <h1>ยอดเงินค้างชำระ ม.5/15</h1>
             </div>
 
-            <!-- 1. แถบข้อมูลโปรไฟล์ย่อย (ย้ายมาไว้บนสุดตามแบบ) -->
-            <div class="profile-bar">
-                <div class="user-info-mini">
-                    <div class="name" id="lineDisplayName">ชื่อ LINE</div>
-                    <div class="id" id="headerStudentId">รหัส: -</div>
+            <!-- โครงสร้างแบบ 2 คอลัมน์ -->
+            <div class="main-layout">
+                
+                <!-- คอลัมน์ซ้าย: ข้อมูลโปรไฟล์, ยอดเงิน, รายละเอียด (หรือฟอร์มลงทะเบียน) -->
+                <div class="left-column">
+                    <!-- แถบโปรไฟล์ LINE -->
+                    <div class="profile-bar">
+                        <div class="user-info-mini">
+                            <div class="name" id="lineDisplayName">ชื่อ LINE</div>
+                            <div class="id" id="headerStudentId">รหัส: -</div>
+                        </div>
+                        <img id="lineProfileImg" class="profile-img" src="" alt="Profile">
+                    </div>
+
+                    <!-- ฟอร์มลงทะเบียน (แสดงเฉพาะตอนยังไม่ลงทะเบียน) -->
+                    <div id="registerSection" class="card" style="display: none;">
+                        <h2>ลงทะเบียนนักเรียน 5/15</h2>
+                        <p>กรอกข้อมูลของคุณเพื่อเชื่อมต่อระบบ</p>
+                        <form id="registerForm">
+                            <input type="text" id="studentId" placeholder="หมายเลขนักเรียน (5 หลัก)" maxlength="5" required>
+                            <input type="text" id="studentName" placeholder="ชื่อ - นามสกุล" required>
+                            <button type="submit">ยืนยันข้อมูล</button>
+                        </form>
+                    </div>
+
+                    <!-- ส่วนยอดเงินค้างชำระ -->
+                    <div class="debt-card">
+                        <div class="debt-title">ยอดเงินค้างชำระทั้งหมด</div>
+                        <div class="debt-amount"><span id="showBalance">0.00</span> <span class="debt-unit">บาท</span></div>
+                    </div>
+
+                    <!-- ส่วนรายละเอียดข้อมูล -->
+                    <div class="detail-card">
+                        <h3>รายละเอียดข้อมูล</h3>
+                        <p><strong>ชื่อ-นามสกุล:</strong> <span id="showStudentName" style="color: #6d28d9; font-weight: 500;">-</span></p>
+                        <p><strong>หมายเลขนักเรียน:</strong> <span id="showStudentId" style="color: #6d28d9; font-weight: 500;">-</span></p>
+                        <p><strong>สถานะระบบ:</strong> <span style="color: #059669; font-weight: 500;">ยืนยันตัวตนเรียบร้อย ✅</span></p>
+                    </div>
                 </div>
-                <img id="lineProfileImg" class="profile-img" src="" alt="Profile">
-            </div>
 
-            <!-- 2. กล่องแสดงประกาศ -->
-            <div class="announcement-box">
-                <h3>📢 ประกาศจากห้อง</h3>
-                <div id="announcementList">
-                    <p style="font-size: 13px; color: #64748b; margin: 0;">กำลังโหลดประกาศ...</p>
+                <!-- คอลัมน์ขวา: ประกาศจากห้อง และปุ่มจัดการ -->
+                <div class="right-column">
+                    <!-- ปุ่มพิเศษสำหรับเหรัญยิก/แอดมิน -->
+                    <div id="treasurerSection" style="display: none;">
+                        <button class="treasurer-btn" onclick="openAnnouncementForm()">➕ เพิ่มประกาศใหม่</button>
+                    </div>
+
+                    <!-- ฟอร์มเพิ่ม/แก้ไขประกาศ -->
+                    <div id="announcementModal" class="card" style="display: none;">
+                        <h2 id="formTitle">สร้างประกาศใหม่</h2>
+                        <form id="announcementForm">
+                            <input type="hidden" id="editAnnouncementId">
+                            <input type="text" id="announcementTitle" placeholder="หัวข้อประกาศ" required>
+                            <textarea id="announcementContent" rows="3" placeholder="รายละเอียดเนื้อหาประกาศ..." required></textarea>
+                            <button type="submit" id="submitBtn">เผยแพร่ประกาศ</button>
+                        </form>
+                    </div>
+
+                    <!-- กล่องแสดงประกาศ -->
+                    <div class="announcement-box">
+                        <h3>📢 ประกาศจากห้อง</h3>
+                        <div id="announcementList">
+                            <p style="font-size: 13px; color: #64748b; margin: 0;">กำลังโหลดประกาศ...</p>
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            <!-- ปุ่มพิเศษสำหรับเหรัญยิก/แอดมิน -->
-            <div id="treasurerSection" style="display: none;">
-                <button class="treasurer-btn" onclick="openAnnouncementForm()">➕ เพิ่มประกาศใหม่</button>
-            </div>
-
-            <!-- ฟอร์มเพิ่มประกาศ -->
-            <div id="announcementModal" class="card" style="display: none;">
-                <h2 id="formTitle">สร้างประกาศใหม่</h2>
-                <form id="announcementForm">
-                    <input type="hidden" id="editAnnouncementId">
-                    <input type="text" id="announcementTitle" placeholder="หัวข้อประกาศ" required>
-                    <textarea id="announcementContent" rows="3" placeholder="รายละเอียดเนื้อหาประกาศ..." required></textarea>
-                    <button type="submit" id="submitBtn">เผยแพร่ประกาศ</button>
-                </form>
-            </div>
-
-            <!-- ส่วนฟอร์มลงทะเบียน (แสดงเฉพาะตอนยังไม่ลงทะเบียน) -->
-            <div id="registerSection" class="card" style="display: none;">
-                <h2>ลงทะเบียนนักเรียน 5/15</h2>
-                <p>กรอกข้อมูลของคุณเพื่อเชื่อมต่อระบบ</p>
-                <form id="registerForm">
-                    <input type="text" id="studentId" placeholder="หมายเลขนักเรียน (5 หลัก)" maxlength="5" required>
-                    <input type="text" id="studentName" placeholder="ชื่อ - นามสกุล" required>
-                    <button type="submit">ยืนยันข้อมูล</button>
-                </form>
-            </div>
-
-            <!-- 3. ส่วนยอดเงินค้างชำระ -->
-            <div class="debt-card">
-                <div class="debt-title">ยอดเงินค้างชำระทั้งหมด</div>
-                <div class="debt-amount"><span id="showBalance">0.00</span> <span class="debt-unit">บาท</span></div>
-            </div>
-
-            <!-- 4. ส่วนรายละเอียดข้อมูล -->
-            <div class="detail-card">
-                <h3>รายละเอียดข้อมูล</h3>
-                <p><strong>ชื่อ-นามสกุล:</strong> <span id="showStudentName" style="color: #6d28d9; font-weight: 500;">-</span></p>
-                <p><strong>หมายเลขนักเรียน:</strong> <span id="showStudentId" style="color: #6d28d9; font-weight: 500;">-</span></p>
-                <p><strong>สถานะระบบ:</strong> <span style="color: #059669; font-weight: 500;">ยืนยันตัวตนเรียบร้อย ✅</span></p>
             </div>
 
         </div>
