@@ -130,7 +130,7 @@
             font-size: 14px;
             margin-bottom: 16px;
         }
-        input[type="text"], input[type="number"], input[type="file"], textarea {
+        input[type="text"], input[type="number"], textarea {
             width: 100%;
             padding: 12px 16px;
             font-size: 15px;
@@ -145,22 +145,39 @@
             border-color: #7c3aed;
             background-color: #ffffff;
         }
-        
-        /* สไตล์ checkbox สำหรับสถานะจ่ายเงิน */
-        .checkbox-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 14px;
+
+        /* สไตล์ช่องเลือกไฟล์แบบมินิมอลโทนม่วง */
+        input[type="file"] {
+            width: 100%;
+            padding: 10px 14px;
             font-size: 14px;
-            color: #334155;
+            border: 2px dashed #d8b4fe;
+            border-radius: 12px;
+            outline: none;
+            background-color: #faf5ff;
+            color: #4c1d95;
+            margin-bottom: 14px;
             cursor: pointer;
+            transition: all 0.2s;
         }
-        .checkbox-container input {
-            width: 18px;
-            height: 18px;
-            accent-color: #7c3aed;
+        input[type="file"]:hover {
+            border-color: #9333ea;
+            background-color: #f3e8ff;
+        }
+        input[type="file"]::file-selector-button {
+            background-color: #7c3aed;
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
             cursor: pointer;
+            margin-right: 12px;
+            transition: background 0.2s;
+        }
+        input[type="file"]::file-selector-button:hover {
+            background-color: #6d28d9;
         }
 
         button[type="submit"], .treasurer-btn {
@@ -175,6 +192,7 @@
             cursor: pointer;
             box-shadow: 0 4px 12px rgba(124, 58, 237, 0.2);
             text-align: center;
+            transition: background 0.2s;
         }
         button[type="submit"]:hover, .treasurer-btn:hover {
             background-color: #6d28d9;
@@ -185,6 +203,25 @@
         }
         .treasurer-btn:hover {
             background: linear-gradient(135deg, #047857 0%, #065f46 100%);
+        }
+
+        /* ปุ่มยกเลิก / ปุ่มรอง แบบมินิมอล */
+        .btn-secondary {
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            background-color: #f3e8ff;
+            color: #6d28d9;
+            border: 1px solid #d8b4fe;
+            border-radius: 12px;
+            cursor: pointer;
+            text-align: center;
+            margin-top: 8px;
+            transition: all 0.2s;
+        }
+        .btn-secondary:hover {
+            background-color: #e9d5ff;
         }
 
         /* กล่องยอดเงินค้างชำระ */
@@ -370,6 +407,7 @@
             font-size: 12px;
             cursor: pointer;
             font-weight: 500;
+            transition: background 0.2s;
         }
         .upload-slip-btn:hover {
             background: #6d28d9;
@@ -385,6 +423,7 @@
             text-decoration: none;
             font-weight: 500;
             display: inline-block;
+            transition: background 0.2s;
         }
         .view-slip-btn:hover {
             background: #0369a1;
@@ -398,6 +437,7 @@
             font-size: 12px;
             cursor: pointer;
             font-weight: 500;
+            transition: background 0.2s;
         }
         .approve-btn:hover {
             background: #15803d;
@@ -522,16 +562,13 @@
                         <button class="treasurer-btn" onclick="openAnnouncementForm()">➕ เพิ่มประกาศใหม่</button>
                     </div>
 
-                    <!-- ฟอร์มเพิ่ม/แก้ไขประกาศ -->
+                    <!-- ฟอร์มเพิ่ม/แก้ไขประกาศ (นำ checkbox ออกแล้ว) -->
                     <div id="announcementModal" class="card" style="display: none;">
                         <h2 id="formTitle">สร้างประกาศใหม่</h2>
                         <form id="announcementForm">
                             <input type="hidden" id="editAnnouncementId">
                             <input type="text" id="announcementTitle" placeholder="หัวข้อประกาศ" required>
                             <input type="number" id="announcementAmount" placeholder="จำนวนเงิน (บาท เช่น 50)" step="1" min="0" required>
-                            <label class="checkbox-container">
-                                <input type="checkbox" id="announcementPaid"> ชำระเงินเรียบร้อยแล้ว (ภาพรวม)
-                            </label>
                             <textarea id="announcementContent" rows="3" placeholder="รายละเอียดเนื้อหาประกาศ..." required></textarea>
                             <button type="submit" id="submitBtn">เผยแพร่ประกาศ</button>
                         </form>
@@ -545,7 +582,7 @@
                             <input type="hidden" id="uploadAnnouncementId">
                             <input type="file" id="slipFileImg" accept="image/*" required>
                             <button type="submit">ยืนยันการส่งสลีป</button>
-                            <button type="button" onclick="document.getElementById('uploadModal').style.display='none'" style="background:#cbd5e1; color:#334155; margin-top:8px;">ยกเลิก</button>
+                            <button type="button" class="btn-secondary" onclick="document.getElementById('uploadModal').style.display='none'">ยกเลิก</button>
                         </form>
                     </div>
 
@@ -555,7 +592,7 @@
                         <div id="adminSlipListContainer">
                             กำลังโหลด...
                         </div>
-                        <button type="button" onclick="document.getElementById('adminViewSlipModal').style.display='none'" style="background:#cbd5e1; color:#334155; margin-top:12px;">ปิดหน้าต่าง</button>
+                        <button type="button" class="btn-secondary" onclick="document.getElementById('adminViewSlipModal').style.display='none'">ปิดหน้าต่าง</button>
                     </div>
 
                     <!-- กล่องแสดงประกาศ -->
@@ -652,13 +689,12 @@
                     const editId = document.getElementById('editAnnouncementId').value;
                     const title = document.getElementById('announcementTitle').value;
                     const amount = parseInt(document.getElementById('announcementAmount').value) || 0;
-                    const paid = document.getElementById('announcementPaid').checked;
                     const content = document.getElementById('announcementContent').value;
 
                     if (editId) {
                         const { error: updateError } = await _supabase
                             .from('announcements')
-                            .update({ title: title, amount: amount, paid: paid, content: content })
+                            .update({ title: title, amount: amount, content: content })
                             .eq('id', editId);
 
                         if (updateError) {
@@ -674,7 +710,7 @@
                             .insert([{ 
                                 title: title, 
                                 amount: amount,
-                                paid: paid,
+                                paid: false,
                                 content: content,
                                 author_name: currentStudentName 
                             }]);
@@ -760,14 +796,13 @@
                 return;
             }
 
-            // คำนวณยอดค้างชำระเฉพาะอันที่ยังไม่จ่ายและแอดมินยังไม่อนุมัติ
+            // คำนวณยอดค้างชำระเฉพาะอันที่แอดมินยังไม่อนุมัติสลีป
             let totalDebt = 0;
             announcements.forEach(item => {
                 const foundSlip = mySlips.find(s => s.announcement_id === item.id);
                 const isApproved = foundSlip && foundSlip.status === 'approved';
-                const isGlobalPaid = item.paid === true;
 
-                if (!isGlobalPaid && !isApproved) {
+                if (!isApproved) {
                     totalDebt += Number(item.amount) || 0;
                 }
             });
@@ -787,7 +822,7 @@
                 if (currentUserRole === 'admin' || currentUserRole === 'treasurer') {
                     actionBtnsHtml = `
                         <div class="action-btns">
-                            <button class="edit-btn" onclick="event.stopPropagation(); editAnnouncement(${item.id}, \`${escapeQuotes(item.title)}\`, ${item.amount || 0}, ${item.paid ? true : false}, \`${escapeQuotes(item.content)}\`)">แก้ไข</button>
+                            <button class="edit-btn" onclick="event.stopPropagation(); editAnnouncement(${item.id}, \`${escapeQuotes(item.title)}\`, ${item.amount || 0}, \`${escapeQuotes(item.content)}\`)">แก้ไข</button>
                             <button class="delete-btn" onclick="event.stopPropagation(); deleteAnnouncement(${item.id})">ลบ</button>
                         </div>
                     `;
@@ -800,11 +835,9 @@
                 const foundSlip = mySlips.find(s => s.announcement_id === item.id);
                 let isApproved = foundSlip && foundSlip.status === 'approved';
                 let isPending = foundSlip && foundSlip.status === 'pending';
-                let isGlobalPaid = item.paid === true;
 
-                let fullyPaid = isGlobalPaid || isApproved;
-                let statusClass = fullyPaid ? 'paid' : 'unpaid';
-                let statusText = fullyPaid ? '✅ ชำระเงินแล้ว' : '❌ ยังไม่ชำระเงิน';
+                let statusClass = isApproved ? 'paid' : 'unpaid';
+                let statusText = isApproved ? '✅ ชำระเงินแล้ว' : '❌ ยังไม่ชำระเงิน';
                 let amountFormatted = Number(item.amount || 0).toLocaleString('th-TH', { minimumFractionDigits: 2 });
 
                 let studentActionHtml = '';
@@ -944,11 +977,10 @@
             }
         }
 
-        function editAnnouncement(id, title, amount, paid, content) {
+        function editAnnouncement(id, title, amount, content) {
             document.getElementById('editAnnouncementId').value = id;
             document.getElementById('announcementTitle').value = title;
             document.getElementById('announcementAmount').value = amount;
-            document.getElementById('announcementPaid').checked = paid;
             document.getElementById('announcementContent').value = content;
             document.getElementById('formTitle').innerText = "แก้ไขประกาศ";
             document.getElementById('submitBtn').innerText = "บันทึกการแก้ไข";
