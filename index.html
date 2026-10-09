@@ -130,7 +130,7 @@
             font-size: 14px;
             margin-bottom: 16px;
         }
-        input[type="text"], input[type="number"], textarea {
+        input[type="text"], input[type="number"], input[type="file"], textarea {
             width: 100%;
             padding: 12px 16px;
             font-size: 15px;
@@ -260,7 +260,6 @@
             cursor: pointer;
             transition: background 0.2s;
         }
-        /* ยังไม่จ่าย: ไฮไลต์โทนแดง */
         .announcement-item.unpaid {
             background: #fff5f5;
             border-left: 4px solid #ef4444;
@@ -268,7 +267,6 @@
         .announcement-item.unpaid:hover {
             background: #fee2e2;
         }
-        /* จ่ายแล้ว: ไฮไลต์โทนเขียว */
         .announcement-item.paid {
             background: #f0fdf4;
             border-left: 4px solid #22c55e;
@@ -353,6 +351,61 @@
         }
         .announcement-item.paid .announcement-amount {
             color: #16a34a;
+        }
+
+        /* ปุ่มจัดการสลีป */
+        .slip-action-box {
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .upload-slip-btn {
+            background: #7c3aed;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .upload-slip-btn:hover {
+            background: #6d28d9;
+        }
+        .view-slip-btn {
+            background: #0284c7;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: 500;
+            display: inline-block;
+        }
+        .view-slip-btn:hover {
+            background: #0369a1;
+        }
+        .approve-btn {
+            background: #16a34a;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .approve-btn:hover {
+            background: #15803d;
+        }
+        .pending-text {
+            font-size: 12px;
+            color: #d97706;
+            font-weight: 600;
         }
 
         .action-btns {
@@ -477,11 +530,32 @@
                             <input type="text" id="announcementTitle" placeholder="หัวข้อประกาศ" required>
                             <input type="number" id="announcementAmount" placeholder="จำนวนเงิน (บาท เช่น 50)" step="1" min="0" required>
                             <label class="checkbox-container">
-                                <input type="checkbox" id="announcementPaid"> ชำระเงินเรียบร้อยแล้ว
+                                <input type="checkbox" id="announcementPaid"> ชำระเงินเรียบร้อยแล้ว (ภาพรวม)
                             </label>
                             <textarea id="announcementContent" rows="3" placeholder="รายละเอียดเนื้อหาประกาศ..." required></textarea>
                             <button type="submit" id="submitBtn">เผยแพร่ประกาศ</button>
                         </form>
+                    </div>
+
+                    <!-- Modal อัปโหลดสลีปของนักเรียน -->
+                    <div id="uploadModal" class="card" style="display: none;">
+                        <h2>อัปโหลดสลีปโอนเงิน</h2>
+                        <p id="uploadingTitle" style="font-weight: 600; color: #6d28d9;"></p>
+                        <form id="uploadSlipForm">
+                            <input type="hidden" id="uploadAnnouncementId">
+                            <input type="file" id="slipFileImg" accept="image/*" required>
+                            <button type="submit">ยืนยันการส่งสลีป</button>
+                            <button type="button" onclick="document.getElementById('uploadModal').style.display='none'" style="background:#cbd5e1; color:#334155; margin-top:8px;">ยกเลิก</button>
+                        </form>
+                    </div>
+
+                    <!-- Modal Admin ดูสลีปรายคน -->
+                    <div id="adminViewSlipModal" class="card" style="display: none;">
+                        <h2 id="adminModalTitle">รายการนักเรียนที่ส่งสลีปแล้ว</h2>
+                        <div id="adminSlipListContainer">
+                            กำลังโหลด...
+                        </div>
+                        <button type="button" onclick="document.getElementById('adminViewSlipModal').style.display='none'" style="background:#cbd5e1; color:#334155; margin-top:12px;">ปิดหน้าต่าง</button>
                     </div>
 
                     <!-- กล่องแสดงประกาศ -->
@@ -615,6 +689,49 @@
                     }
                 });
 
+                // อัปโหลดสลีป
+                document.getElementById('uploadSlipForm').addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    const annId = document.getElementById('uploadAnnouncementId').value;
+                    const fileInput = document.getElementById('slipFileImg');
+                    if (fileInput.files.length === 0) return;
+
+                    const file = fileInput.files[0];
+                    const fileExt = file.name.split('.').pop();
+                    const fileName = `${currentLineId}_${annId}_${Date.now()}.${fileExt}`;
+                    const filePath = `${fileName}`;
+
+                    const { error: uploadError } = await _supabase.storage
+                        .from('slips')
+                        .upload(filePath, file);
+
+                    if (uploadError) {
+                        alert("อัปโหลดสลีปไม่สำเร็จ: " + uploadError.message);
+                        return;
+                    }
+
+                    const { data: urlData } = _supabase.storage.from('slips').getPublicUrl(filePath);
+                    const slipUrl = urlData.publicUrl;
+
+                    const { error: slipTableError } = await _supabase
+                        .from('student_slips')
+                        .upsert([{
+                            announcement_id: annId,
+                            line_id: currentLineId,
+                            student_name: currentStudentName,
+                            slip_url: slipUrl,
+                            status: 'pending'
+                        }], { onConflict: 'announcement_id,line_id' });
+
+                    if (slipTableError) {
+                        alert("เกิดข้อผิดพลาดในการบันทึกข้อมูลสลีป: " + slipTableError.message);
+                    } else {
+                        alert("ส่งสลีปเรียบร้อยแล้ว รอผู้ดูแลระบบตรวจสอบ");
+                        document.getElementById('uploadModal').style.display = 'none';
+                        loadAnnouncements();
+                    }
+                });
+
             } catch (error) {
                 console.error("LIFF init failed", error);
                 document.getElementById('loading').innerText = "เกิดข้อผิดพลาดในการโหลดระบบ";
@@ -622,22 +739,35 @@
         }
 
         async function loadAnnouncements() {
-            const { data, error } = await _supabase
+            const { data: announcements, error } = await _supabase
                 .from('announcements')
                 .select('*')
                 .order('id', { ascending: false });
 
+            let mySlips = [];
+            if (currentLineId) {
+                const { data: slipData } = await _supabase
+                    .from('student_slips')
+                    .select('*')
+                    .eq('line_id', currentLineId);
+                if (slipData) mySlips = slipData;
+            }
+
             const container = document.getElementById('announcementList');
-            if (error || !data || data.length === 0) {
+            if (error || !announcements || announcements.length === 0) {
                 container.innerHTML = '<p style="font-size: 13px; color: #64748b; margin: 0;">ยังไม่มีประกาศในขณะนี้</p>';
                 document.getElementById('showBalance').innerText = '0.00';
                 return;
             }
 
-            // คำนวณยอดค้างชำระอัตโนมัติเฉพาะรายการที่ยังไม่จ่าย (paid === false หรือ null)
+            // คำนวณยอดค้างชำระเฉพาะอันที่ยังไม่จ่ายและแอดมินยังไม่อนุมัติ
             let totalDebt = 0;
-            data.forEach(item => {
-                if (!item.paid) {
+            announcements.forEach(item => {
+                const foundSlip = mySlips.find(s => s.announcement_id === item.id);
+                const isApproved = foundSlip && foundSlip.status === 'approved';
+                const isGlobalPaid = item.paid === true;
+
+                if (!isGlobalPaid && !isApproved) {
                     totalDebt += Number(item.amount) || 0;
                 }
             });
@@ -652,7 +782,7 @@
             }
 
             let html = '';
-            data.forEach(item => {
+            announcements.forEach(item => {
                 let actionBtnsHtml = '';
                 if (currentUserRole === 'admin' || currentUserRole === 'treasurer') {
                     actionBtnsHtml = `
@@ -667,10 +797,41 @@
                 let isUnread = !readList.includes(item.id);
                 let badgeHtml = isUnread ? `<span class="new-badge">NEW</span>` : '';
 
-                let isPaid = item.paid === true;
-                let statusClass = isPaid ? 'paid' : 'unpaid';
-                let statusText = isPaid ? '✅ ชำระเงินแล้ว' : '❌ ยังไม่ชำระเงิน';
+                const foundSlip = mySlips.find(s => s.announcement_id === item.id);
+                let isApproved = foundSlip && foundSlip.status === 'approved';
+                let isPending = foundSlip && foundSlip.status === 'pending';
+                let isGlobalPaid = item.paid === true;
+
+                let fullyPaid = isGlobalPaid || isApproved;
+                let statusClass = fullyPaid ? 'paid' : 'unpaid';
+                let statusText = fullyPaid ? '✅ ชำระเงินแล้ว' : '❌ ยังไม่ชำระเงิน';
                 let amountFormatted = Number(item.amount || 0).toLocaleString('th-TH', { minimumFractionDigits: 2 });
+
+                let studentActionHtml = '';
+                if (currentUserRole === 'admin' || currentUserRole === 'treasurer') {
+                    studentActionHtml = `
+                        <div class="slip-action-box">
+                            <button class="upload-slip-btn" onclick="event.stopPropagation(); openAdminViewSlip(${item.id}, \`${escapeQuotes(item.title)}\`)">🔍 ตรวจสอบสลีปผู้ส่ง</button>
+                        </div>
+                    `;
+                } else if (currentUserRole === 'student') {
+                    if (isApproved) {
+                        studentActionHtml = `<div class="slip-action-box"><span style="color: #16a34a; font-size: 12px; font-weight:600;">✅ ตรวจสอบสลีปแล้ว (ชำระแล้ว)</span></div>`;
+                    } else if (isPending) {
+                        studentActionHtml = `
+                            <div class="slip-action-box">
+                                <span class="pending-text">⏳ ส่งสลีปแล้ว (รอตรวจสอบ)</span>
+                                <button class="upload-slip-btn" onclick="event.stopPropagation(); openUploadModal(${item.id}, \`${escapeQuotes(item.title)}\`)">เปลี่ยนสลีป</button>
+                            </div>
+                        `;
+                    } else {
+                        studentActionHtml = `
+                            <div class="slip-action-box">
+                                <button class="upload-slip-btn" onclick="event.stopPropagation(); openUploadModal(${item.id}, \`${escapeQuotes(item.title)}\`)">📤 อัปโหลดสลีปโอนเงิน</button>
+                            </div>
+                        `;
+                    }
+                }
 
                 let formattedDate = '';
                 if (item.created_at) {
@@ -697,10 +858,73 @@
                         <div class="announcement-title">${escapeHtml(item.title)} ${badgeHtml}</div>
                         <p class="announcement-text">${escapeHtml(item.content)}</p>
                         <div class="announcement-amount">ยอดเงิน: ${amountFormatted} บาท (${statusText})</div>
+                        ${studentActionHtml}
                     </div>
                 `;
             });
             container.innerHTML = html;
+        }
+
+        function openUploadModal(annId, title) {
+            document.getElementById('uploadAnnouncementId').value = annId;
+            document.getElementById('uploadingTitle').innerText = "ประกาศ: " + title;
+            document.getElementById('slipFileImg').value = '';
+            document.getElementById('uploadModal').style.display = 'block';
+            document.getElementById('uploadModal').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        async function openAdminViewSlip(annId, title) {
+            const modal = document.getElementById('adminViewSlipModal');
+            const listContainer = document.getElementById('adminSlipListContainer');
+            document.getElementById('adminModalTitle').innerText = "สลีปของประกาศ: " + title;
+            listContainer.innerHTML = 'กำลังโหลดข้อมูลสลีป...';
+            modal.style.display = 'block';
+            modal.scrollIntoView({ behavior: 'smooth' });
+
+            const { data, error } = await _supabase
+                .from('student_slips')
+                .select('*')
+                .eq('announcement_id', annId);
+
+            if (error || !data || data.length === 0) {
+                listContainer.innerHTML = '<p style="font-size:13px; color:#64748b;">ยังไม่มีนักเรียนอัปโหลดสลีปสำหรับประกาศนี้</p>';
+                return;
+            }
+
+            let html = '';
+            data.forEach(slip => {
+                let statusLabel = slip.status === 'approved' ? '<span style="color:#16a34a; font-weight:600;">อนุมัติแล้ว ✅</span>' : '<span style="color:#d97706; font-weight:600;">รอตรวจสอบ ⏳</span>';
+                let approveBtnHtml = slip.status !== 'approved' ? `<button class="approve-btn" onclick="approveSlip('${slip.id}')">กดว่าสำเร็จ (อนุมัติ)</button>` : '';
+
+                html += `
+                    <div style="background:#faf5ff; padding:12px; border-radius:10px; margin-bottom:10px; border:1px solid #e9d5ff;">
+                        <p style="margin:0 0 6px 0; font-weight:600; color:#4c1d95;">นักเรียน: ${escapeHtml(slip.student_name)}</p>
+                        <p style="margin:0 0 8px 0; font-size:13px;">สถานะ: ${statusLabel}</p>
+                        <div style="display:flex; gap:8px; align-items:center;">
+                            <a href="${slip.slip_url}" target="_blank" class="view-slip-btn">🔍 ดูรูปสลีปเต็ม</a>
+                            ${approveBtnHtml}
+                        </div>
+                    </div>
+                `;
+            });
+            listContainer.innerHTML = html;
+        }
+
+        async function approveSlip(slipId) {
+            if (!confirm("ยืนยันว่าสลีปนี้ถูกต้องและชำระเงินสำเร็จแล้วใช่ไหม?")) return;
+
+            const { error } = await _supabase
+                .from('student_slips')
+                .update({ status: 'approved' })
+                .eq('id', slipId);
+
+            if (error) {
+                alert("เกิดข้อผิดพลาด: " + error.message);
+            } else {
+                alert("อนุมัติสลีปสำเร็จ! ยอดค้างชำระของนักเรียนจะถูกหักออกทันที");
+                document.getElementById('adminViewSlipModal').style.display = 'none';
+                loadAnnouncements();
+            }
         }
 
         function markAsRead(id) {
