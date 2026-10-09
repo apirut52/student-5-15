@@ -130,7 +130,7 @@
             font-size: 14px;
             margin-bottom: 16px;
         }
-        input[type="text"], textarea {
+        input[type="text"], input[type="number"], textarea {
             width: 100%;
             padding: 12px 16px;
             font-size: 15px;
@@ -141,10 +141,28 @@
             color: #4c1d95;
             margin-bottom: 14px;
         }
-        input[type="text"]:focus, textarea:focus {
+        input[type="text"]:focus, input[type="number"]:focus, textarea:focus {
             border-color: #7c3aed;
             background-color: #ffffff;
         }
+        
+        /* สไตล์ checkbox สำหรับสถานะจ่ายเงิน */
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+            font-size: 14px;
+            color: #334155;
+            cursor: pointer;
+        }
+        .checkbox-container input {
+            width: 18px;
+            height: 18px;
+            accent-color: #7c3aed;
+            cursor: pointer;
+        }
+
         button[type="submit"], .treasurer-btn {
             width: 100%;
             padding: 12px;
@@ -232,19 +250,33 @@
             align-items: center;
             gap: 6px;
         }
+
+        /* สไตล์ประกาศตามสถานะจ่ายเงิน */
         .announcement-item {
-            background: #faf5ff;
             padding: 14px;
             border-radius: 12px;
-            border-left: 4px solid #7c3aed;
             margin-bottom: 10px;
             position: relative;
             cursor: pointer;
             transition: background 0.2s;
         }
-        .announcement-item:hover {
-            background: #f3e8ff;
+        /* ยังไม่จ่าย: ไฮไลต์โทนแดง */
+        .announcement-item.unpaid {
+            background: #fff5f5;
+            border-left: 4px solid #ef4444;
         }
+        .announcement-item.unpaid:hover {
+            background: #fee2e2;
+        }
+        /* จ่ายแล้ว: ไฮไลต์โทนเขียว */
+        .announcement-item.paid {
+            background: #f0fdf4;
+            border-left: 4px solid #22c55e;
+        }
+        .announcement-item.paid:hover {
+            background: #dcfce7;
+        }
+
         .announcement-item:last-child {
             margin-bottom: 0;
         }
@@ -273,14 +305,12 @@
             color: #6d28d9;
         }
         
-        /* แสดงวันที่ประกาศ */
         .announcement-date {
             font-size: 11px;
             color: #94a3b8;
             margin-left: auto;
         }
 
-        /* ป้ายแจ้งเตือนข้อความใหม่ */
         .new-badge {
             background-color: #ef4444;
             color: white;
@@ -313,6 +343,18 @@
             margin: 0;
             white-space: pre-line;
         }
+        .announcement-amount {
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+        .announcement-item.unpaid .announcement-amount {
+            color: #dc2626;
+        }
+        .announcement-item.paid .announcement-amount {
+            color: #16a34a;
+        }
+
         .action-btns {
             position: absolute;
             top: 12px;
@@ -383,7 +425,7 @@
             <!-- โครงสร้างแบบ 2 คอลัมน์ -->
             <div class="main-layout">
                 
-                <!-- คอลัมน์ซ้าย: ข้อมูลโปรไฟล์, ยอดเงิน, รายละเอียด (หรือฟอร์มลงทะเบียน) -->
+                <!-- คอลัมน์ซ้าย: ข้อมูลโปรไฟล์, ยอดเงิน, รายละเอียด -->
                 <div class="left-column">
                     <!-- แถบโปรไฟล์ LINE -->
                     <div class="profile-bar">
@@ -411,7 +453,7 @@
                         <div class="debt-amount"><span id="showBalance">0.00</span> <span class="debt-unit">บาท</span></div>
                     </div>
 
-                    <!-- ส่วนรายละเอียดข้อมูล (ย้ายกลับมาฝั่งซ้าย) -->
+                    <!-- ส่วนรายละเอียดข้อมูล -->
                     <div class="detail-card">
                         <h3>รายละเอียดข้อมูล</h3>
                         <p><strong>ชื่อ-นามสกุล:</strong> <span id="showStudentName" style="color: #6d28d9; font-weight: 500;">-</span></p>
@@ -433,6 +475,10 @@
                         <form id="announcementForm">
                             <input type="hidden" id="editAnnouncementId">
                             <input type="text" id="announcementTitle" placeholder="หัวข้อประกาศ" required>
+                            <input type="number" id="announcementAmount" placeholder="จำนวนเงิน (บาท เช่น 50)" step="1" min="0" required>
+                            <label class="checkbox-container">
+                                <input type="checkbox" id="announcementPaid"> ชำระเงินเรียบร้อยแล้ว
+                            </label>
                             <textarea id="announcementContent" rows="3" placeholder="รายละเอียดเนื้อหาประกาศ..." required></textarea>
                             <button type="submit" id="submitBtn">เผยแพร่ประกาศ</button>
                         </form>
@@ -491,9 +537,6 @@
                     document.getElementById('showStudentId').innerText = data.student_id;
                     document.getElementById('headerStudentId').innerText = 'รหัส: ' + data.student_id;
                     document.getElementById('showStudentName').innerText = currentStudentName;
-                    
-                    const userBalance = data.balance !== undefined && data.balance !== null ? data.balance : 0;
-                    document.getElementById('showBalance').innerText = Number(userBalance).toLocaleString('th-TH', { minimumFractionDigits: 2 });
 
                     if (currentUserRole === 'treasurer' || currentUserRole === 'admin') {
                         document.getElementById('treasurerSection').style.display = 'block';
@@ -502,7 +545,7 @@
                     document.getElementById('registerSection').style.display = 'block';
                 }
 
-                loadAnnouncements();
+                await loadAnnouncements();
 
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('mainContent').style.display = 'block';
@@ -534,12 +577,14 @@
                     e.preventDefault();
                     const editId = document.getElementById('editAnnouncementId').value;
                     const title = document.getElementById('announcementTitle').value;
+                    const amount = parseInt(document.getElementById('announcementAmount').value) || 0;
+                    const paid = document.getElementById('announcementPaid').checked;
                     const content = document.getElementById('announcementContent').value;
 
                     if (editId) {
                         const { error: updateError } = await _supabase
                             .from('announcements')
-                            .update({ title: title, content: content })
+                            .update({ title: title, amount: amount, paid: paid, content: content })
                             .eq('id', editId);
 
                         if (updateError) {
@@ -554,6 +599,8 @@
                             .from('announcements')
                             .insert([{ 
                                 title: title, 
+                                amount: amount,
+                                paid: paid,
                                 content: content,
                                 author_name: currentStudentName 
                             }]);
@@ -583,8 +630,18 @@
             const container = document.getElementById('announcementList');
             if (error || !data || data.length === 0) {
                 container.innerHTML = '<p style="font-size: 13px; color: #64748b; margin: 0;">ยังไม่มีประกาศในขณะนี้</p>';
+                document.getElementById('showBalance').innerText = '0.00';
                 return;
             }
+
+            // คำนวณยอดค้างชำระอัตโนมัติเฉพาะรายการที่ยังไม่จ่าย (paid === false หรือ null)
+            let totalDebt = 0;
+            data.forEach(item => {
+                if (!item.paid) {
+                    totalDebt += Number(item.amount) || 0;
+                }
+            });
+            document.getElementById('showBalance').innerText = totalDebt.toLocaleString('th-TH', { minimumFractionDigits: 2 });
 
             let readList = [];
             try {
@@ -600,7 +657,7 @@
                 if (currentUserRole === 'admin' || currentUserRole === 'treasurer') {
                     actionBtnsHtml = `
                         <div class="action-btns">
-                            <button class="edit-btn" onclick="event.stopPropagation(); editAnnouncement(${item.id}, \`${escapeQuotes(item.title)}\`, \`${escapeQuotes(item.content)}\`)">แก้ไข</button>
+                            <button class="edit-btn" onclick="event.stopPropagation(); editAnnouncement(${item.id}, \`${escapeQuotes(item.title)}\`, ${item.amount || 0}, ${item.paid ? true : false}, \`${escapeQuotes(item.content)}\`)">แก้ไข</button>
                             <button class="delete-btn" onclick="event.stopPropagation(); deleteAnnouncement(${item.id})">ลบ</button>
                         </div>
                     `;
@@ -609,6 +666,11 @@
                 let authorName = item.author_name ? escapeHtml(item.author_name) : "ผู้ดูแลระบบ";
                 let isUnread = !readList.includes(item.id);
                 let badgeHtml = isUnread ? `<span class="new-badge">NEW</span>` : '';
+
+                let isPaid = item.paid === true;
+                let statusClass = isPaid ? 'paid' : 'unpaid';
+                let statusText = isPaid ? '✅ ชำระเงินแล้ว' : '❌ ยังไม่ชำระเงิน';
+                let amountFormatted = Number(item.amount || 0).toLocaleString('th-TH', { minimumFractionDigits: 2 });
 
                 let formattedDate = '';
                 if (item.created_at) {
@@ -623,7 +685,7 @@
                 }
 
                 html += `
-                    <div class="announcement-item" onclick="markAsRead(${item.id})">
+                    <div class="announcement-item ${statusClass}" onclick="markAsRead(${item.id})">
                         ${actionBtnsHtml}
                         <div class="announcement-header">
                             <div class="author-info">
@@ -634,6 +696,7 @@
                         </div>
                         <div class="announcement-title">${escapeHtml(item.title)} ${badgeHtml}</div>
                         <p class="announcement-text">${escapeHtml(item.content)}</p>
+                        <div class="announcement-amount">ยอดเงิน: ${amountFormatted} บาท (${statusText})</div>
                     </div>
                 `;
             });
@@ -657,9 +720,11 @@
             }
         }
 
-        function editAnnouncement(id, title, content) {
+        function editAnnouncement(id, title, amount, paid, content) {
             document.getElementById('editAnnouncementId').value = id;
             document.getElementById('announcementTitle').value = title;
+            document.getElementById('announcementAmount').value = amount;
+            document.getElementById('announcementPaid').checked = paid;
             document.getElementById('announcementContent').value = content;
             document.getElementById('formTitle').innerText = "แก้ไขประกาศ";
             document.getElementById('submitBtn').innerText = "บันทึกการแก้ไข";
