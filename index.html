@@ -30,11 +30,11 @@
             max-width: 420px;
         }
         
-        /* ส่วนหัว: เอาพื้นหลังขาวออก เหลือแค่โลโก้และข้อความลอย */
+        /* ส่วนหัว: โลโก้และข้อความลอยแบบไม่มีพื้นหลังขาว */
         .header-top {
             text-align: center;
             padding: 10px 20px 20px 20px;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
         }
         .big-school-logo {
             width: 75px;
@@ -312,7 +312,7 @@
                 <h1>ยอดเงินค้างชำระ ม.5/15</h1>
             </div>
 
-            <!-- แถบโปรไฟล์ LINE และรหัสนักเรียน -->
+            <!-- 1. แถบข้อมูลโปรไฟล์ย่อย (ย้ายมาไว้บนสุดตามแบบ) -->
             <div class="profile-bar">
                 <div class="user-info-mini">
                     <div class="name" id="lineDisplayName">ชื่อ LINE</div>
@@ -321,7 +321,7 @@
                 <img id="lineProfileImg" class="profile-img" src="" alt="Profile">
             </div>
 
-            <!-- กล่องแสดงประกาศ -->
+            <!-- 2. กล่องแสดงประกาศ -->
             <div class="announcement-box">
                 <h3>📢 ประกาศจากห้อง</h3>
                 <div id="announcementList">
@@ -345,7 +345,7 @@
                 </form>
             </div>
 
-            <!-- 1. ส่วนฟอร์มลงทะเบียน -->
+            <!-- ส่วนฟอร์มลงทะเบียน (แสดงเฉพาะตอนยังไม่ลงทะเบียน) -->
             <div id="registerSection" class="card" style="display: none;">
                 <h2>ลงทะเบียนนักเรียน 5/15</h2>
                 <p>กรอกข้อมูลของคุณเพื่อเชื่อมต่อระบบ</p>
@@ -356,13 +356,13 @@
                 </form>
             </div>
 
-            <!-- 2. ส่วนยอดเงินค้างชำระ -->
+            <!-- 3. ส่วนยอดเงินค้างชำระ -->
             <div class="debt-card">
                 <div class="debt-title">ยอดเงินค้างชำระทั้งหมด</div>
                 <div class="debt-amount"><span id="showBalance">0.00</span> <span class="debt-unit">บาท</span></div>
             </div>
 
-            <!-- 3. ส่วนรายละเอียดข้อมูล -->
+            <!-- 4. ส่วนรายละเอียดข้อมูล -->
             <div class="detail-card">
                 <h3>รายละเอียดข้อมูล</h3>
                 <p><strong>ชื่อ-นามสกุล:</strong> <span id="showStudentName" style="color: #6d28d9; font-weight: 500;">-</span></p>
